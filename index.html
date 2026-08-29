@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>طيار | دليل أدوات الذكاء الاصطناعي</title>
+<style>
+  :root{
+    --bg-deep:#05080d;
+    --bg-panel:#0b111a;
+    --bg-panel-2:#0f1826;
+    --line:#1c2a3a;
+    --radar:#28e0b0;
+    --radar-dim:#0f5c4a;
+    --amber:#ffb347;
+    --text-main:#e7eef5;
+    --text-dim:#7f93a8;
+    --danger:#ff5d5d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    background:var(--bg-deep);
+    color:var(--text-main);
+    font-family:'Tahoma','Segoe UI',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  body{
+    background-image:
+      radial-gradient(circle at 50% 0%, rgba(40,224,176,0.08), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+  }
+
+  /* ===== Header / Cockpit strip ===== */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:linear-gradient(180deg, #070c12 0%, #05080d 100%);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px;
+  }
+  .cockpit-top{
+    display:flex; align-items:center; justify-content:space-between;
+    max-width:1100px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-icon{
+    width:38px; height:38px; border-radius:50%;
+    border:2px solid var(--radar);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    box-shadow:0 0 14px rgba(40,224,176,0.5);
+  }
+  .brand-icon::after{
+    content:"";
+    position:absolute; width:2px; height:14px; background:var(--radar);
+    top:4px; left:50%; transform:translateX(-50%);
+    transform-origin:bottom center;
+    animation:sweep 3s linear infinite;
+  }
+  @keyframes sweep{ from{transform:translateX(-50%) rotate(0deg);} to{transform:translateX(-50%) rotate(360deg);} }
+  .brand h1{font-size:20px; letter-spacing:1px; color:var(--text-main);}
+  .brand span.sub{display:block; font-size:11px; color:var(--text-dim); letter-spacing:2px;}
+  .status-badge{
+    font-size:11px; color:var(--radar); border:1px solid var(--radar-dim);
+    padding:5px 10px; border-radius:20px; display:flex; align-items:center; gap:6px;
+  }
+  .status-dot{width:7px; height:7px; border-radius:50%; background:var(--radar); box-shadow:0 0 6px var(--radar); animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  .hud-line{
+    max-width:1100px; margin:12px auto 0; display:flex; gap:18px;
+    font-size:11px; color:var(--text-dim); border-top:1px dashed var(--line); padding-top:10px;
+    flex-wrap:wrap;
+  }
+  .hud-line b{color:var(--amber); font-weight:normal;}
+
+  /* ===== Search / Radar control ===== */
+  .control-deck{
+    max-width:1100px; margin:26px auto 10px; padding:0 20px;
+  }
+  .search-wrap{position:relative;}
+  .search-wrap input{
+    width:100%;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    color:var(--text-main);
+    padding:14px 46px 14px 16px;
+    border-radius:10px;
+    font-size:15px;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .search-wrap input:focus{border-color:var(--radar); box-shadow:0 0 0 3px rgba(40,224,176,0.12);}
+  .search-wrap input::placeholder{color:var(--text-dim);}
+  .search-wrap svg{position:absolute; right:16px; top:50%; transform:translateY(-50%); color:var(--text-dim);}
+
+  .categories-strip{
+    display:flex; gap:8px; overflow-x:auto; padding:16px 20px 4px; max-width:1100px; margin:0 auto;
+    scrollbar-width:none;
+  }
+  .categories-strip::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    color:var(--text-dim);
+    padding:8px 16px;
+    border-radius:20px;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .18s;
+  }
+  .chip:hover{border-color:var(--radar-dim); color:var(--text-main);}
+  .chip.active{
+    background:rgba(40,224,176,0.12);
+    border-color:var(--radar);
+    color:var(--radar);
+  }
+
+  /* ===== Grid ===== */
+  main{max-width:1100px; margin:0 auto; padding:20px;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+    gap:16px;
+  }
+  .card{
+    background:linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-panel-2) 100%);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    transition:transform .18s, border-color .18s, box-shadow .18s;
+    text-decoration:none;
+    color:inherit;
+    display:flex;
+    flex-direction:column;
+    min-height:180px;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 100% 0%, rgba(40,224,176,0.08), transparent 55%);
+    opacity:0; transition:opacity .2s;
+  }
+  .card:hover{
+    transform:translateY(-3px);
+    border-color:var(--radar-dim);
+    box-shadow:0 10px 30px -12px rgba(40,224,176,0.25);
+  }
+  .card:hover::before{opacity:1;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .card-name{font-size:17px; font-weight:bold; color:var(--text-main);}
+  .pricing-tag{
+    font-size:10px; padding:3px 9px; border-radius:6px; white-space:nowrap; letter-spacing:.5px;
+  }
+  .pricing-free{background:rgba(40,224,176,0.14); color:var(--radar); border:1px solid var(--radar-dim);}
+  .pricing-freemium{background:rgba(255,179,71,0.14); color:var(--amber); border:1px solid #8a5a1c;}
+  .pricing-paid{background:rgba(255,93,93,0.12); color:var(--danger); border:1px solid #6e2626;}
+
+  .card-desc{
+    margin-top:10px; font-size:13px; color:var(--text-dim); line-height:1.7; flex:1;
+  }
+  .card-cat{
+    margin-top:14px; font-size:11px; color:var(--radar-dim); display:flex; align-items:center; gap:6px;
+  }
+  .card-footer{
+    margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12px; color:var(--radar);
+  }
+  .card-footer .go{display:flex; align-items:center; gap:5px;}
+
+  .empty, .loading, .err{
+    text-align:center; padding:70px 20px; color:var(--text-dim); font-size:14px;
+  }
+  .loading .radar-loader{
+    width:56px; height:56px; margin:0 auto 18px; border-radius:50%;
+    border:2px solid var(--line); position:relative;
+  }
+  .loading .radar-loader::after{
+    content:""; position:absolute; inset:0; border-radius:50%;
+    border-top:2px solid var(--radar); animation:spin 1s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  footer{
+    text-align:center; padding:30px 20px 40px; color:var(--text-dim); font-size:11px;
+    border-top:1px solid var(--line); margin-top:30px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="cockpit-top">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <div>
+        <h1>طيار</h1>
+        <span class="sub">AI TOOL PILOT</span>
+      </div>
+    </div>
+    <div class="status-badge"><span class="status-dot"></span> النظام متصل</div>
+  </div>
+  <div class="hud-line" id="hudLine">
+    <span>الأدوات المرصودة: <b id="hudTools">—</b></span>
+    <span>التصنيفات: <b id="hudCats">—</b></span>
+    <span>الحالة: <b>جاهز للإقلاع</b></span>
+  </div>
+</header>
+
+<div class="control-deck">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="ابحث عن أداة ذكاء اصطناعي...">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+  </div>
+</div>
+
+<div class="categories-strip" id="categoriesStrip">
+  <div class="chip active" data-cat="all">كل الرادار</div>
+</div>
+
+<main>
+  <div class="loading" id="loadingState">
+    <div class="radar-loader"></div>
+    جاري مسح الرادار عن الأدوات...
+  </div>
+  <div class="grid" id="toolsGrid" style="display:none;"></div>
+  <div class="empty" id="emptyState" style="display:none;">لا توجد أدوات تطابق البحث</div>
+  <div class="err" id="errState" style="display:none;"></div>
+</main>
+
+<footer>
+  طيار — دليلك للإقلاع بأدوات الذكاء الاصطناعي الصحيحة
+</footer>
+
+<script>
+  const SUPABASE_URL = "https://ziwfegoxgyytxvanqygb.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inppd2ZlZ294Z3l5dHh2YW5xeWdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MjYzMjMsImV4cCI6MjEwMTUwMjMyM30.HZh0HiXf30HUqVRfHUW2cwUlIuXLqG3xFpGn9ysCG30";
+
+  let allTools = [];
+  let allCategories = [];
+  let activeCategory = "all";
+  let searchTerm = "";
+
+  const pricingLabels = {
+    free: { text: "مجاني", cls: "pricing-free" },
+    freemium: { text: "مجاني جزئياً", cls: "pricing-freemium" },
+    paid: { text: "مدفوع", cls: "pricing-paid" }
+  };
+
+  async function fetchData(){
+    try{
+      const headers = {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + SUPABASE_ANON_KEY
+      };
+
+      const [toolsRes, catsRes] = await Promise.all([
+        fetch(`${SUPABASE_URL}/rest/v1/tools?select=*`, { headers }),
+        fetch(`${SUPABASE_URL}/rest/v1/categories?select=*`, { headers })
+      ]);
+
+      if(!toolsRes.ok || !catsRes.ok) throw new Error("فشل الاتصال بقاعدة البيانات");
+
+      allTools = await toolsRes.json();
+      allCategories = await catsRes.json();
+
+      document.getElementById("hudTools").textContent = allTools.length;
+      document.getElementById("hudCats").textContent = allCategories.length;
+
+      renderCategories();
+      renderTools();
+      document.getElementById("loadingState").style.display = "none";
+      document.getElementById("toolsGrid").style.display = "grid";
+    }catch(err){
+      document.getElementById("loadingState").style.display = "none";
+      const errEl = document.getElementById("errState");
+      errEl.style.display = "block";
+      errEl.textContent = "تعذر الاتصال بالرادار: " + err.message;
+    }
+  }
+
+  function categoryName(id){
+    const c = allCategories.find(c => c.id === id);
+    return c ? c.name : "";
+  }
+
+  function renderCategories(){
+    const strip = document.getElementById("categoriesStrip");
+    allCategories.forEach(cat => {
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      chip.dataset.cat = cat.id;
+      chip.textContent = (cat.icon ? cat.icon + " " : "") + cat.name;
+      chip.addEventListener("click", () => {
+        activeCategory = cat.id;
+        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        renderTools();
+      });
+      strip.appendChild(chip);
+    });
+    strip.querySelector('[data-cat="all"]').addEventListener("click", (e) => {
+      activeCategory = "all";
+      document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+      e.target.classList.add("active");
+      renderTools();
+    });
+  }
+
+  function renderTools(){
+    const grid = document.getElementById("toolsGrid");
+    const emptyState = document.getElementById("emptyState");
+    grid.innerHTML = "";
+
+    let filtered = allTools.filter(t => {
+      const matchCat = activeCategory === "all" || t.category_id === activeCategory;
+      const matchSearch = !searchTerm || t.name.toLowerCase().includes(searchTerm) || (t.short_description || "").toLowerCase().includes(searchTerm);
+      return matchCat && matchSearch;
+    });
+
+    if(filtered.length === 0){
+      grid.style.display = "none";
+      emptyState.style.display = "block";
+      return;
+    }
+    grid.style.display = "grid";
+    emptyState.style.display = "none";
+
+    filtered.forEach(tool => {
+      const pricing = pricingLabels[tool.pricing_type] || { text: tool.pricing_type || "", cls: "pricing-freemium" };
+      const card = document.createElement("a");
+      card.href = tool.affiliate_url || "#";
+      card.target = "_blank";
+      card.rel = "noopener noreferrer sponsored";
+      card.className = "card";
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-name">${escapeHtml(tool.name)}</div>
+          <div class="pricing-tag ${pricing.cls}">${pricing.text}</div>
+        </div>
+        <div class="card-desc">${escapeHtml(tool.short_description || "")}</div>
+        <div class="card-cat">◈ ${escapeHtml(categoryName(tool.category_id))}</div>
+        <div class="card-footer">
+          <span>زيارة الأداة</span>
+          <span class="go">إقلاع ←</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById("searchInput").addEventListener("input", (e) => {
+    searchTerm = e.target.value.trim().toLowerCase();
+    renderTools();
+  });
+
+  fetchData();
+</script>
+</body>
+</html>
